@@ -1,0 +1,15 @@
+[package]
+name = "sky-fx"
+version = "0.1.0"
+edition = "2021"
+description = "Weather particle engine (rain, drizzle, snow, stars, lightning) for Sky Tab, compiled to WebAssembly"
+
+[lib]
+crate-type = ["cdylib"]
+
+[profile.release]
+opt-level = "s"
+lto = true
+panic = "abort"
+codegen-units = 1
+strip = true

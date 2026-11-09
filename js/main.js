@@ -1,5 +1,5 @@
 import { initStore, get, set, DEFAULT_SETTINGS, DEFAULT_LOCATION } from './store.js';
-import { fetchWeather, applySim, searchCity, kindOf, textOf, icon, windDirText, toF, localMinutes } from './weather.js';
+import { fetchWeather, applySim, searchCity, kindOf, textOf, icon, windDirText, toF, localMinutes, SIM } from './weather.js';
 import { setSky, tickSky } from './sky.js';
 import { initNotes } from './notes.js';
 import { initBookmarks } from './bookmarks.js';
@@ -142,10 +142,11 @@ document.addEventListener('keydown', (e) => {
 function pushSky() {
   const w = shown();
   const base = real || { offset: undefined, sunrise: 360, sunset: 1080 };
+  const sim = !w ? SIM[settings.simKind] : null; // پیش‌نمایش حتی بدون اینترنت
   setSky({
-    kind: w ? kindOf(w.now.code) : 'clear',
-    code: w ? w.now.code : 0,
-    cloud: w ? w.now.cloud : 10,
+    kind: w ? kindOf(w.now.code) : sim ? kindOf(sim.code) : 'clear',
+    code: w ? w.now.code : sim ? sim.code : 0,
+    cloud: w ? w.now.cloud : sim ? sim.cloud : 10,
     offset: base.offset, sunrise: base.sunrise, sunset: base.sunset,
     hourOverride: settings.simHour,
     fxOn: settings.fx,

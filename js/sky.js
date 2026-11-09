@@ -198,12 +198,29 @@ let W = 0, H = 0, dpr = 1;
 let stars = [], drops = [], flakes = [];
 let raf = 0, last = 0, bolt = null, nextBolt = 0;
 
+// ---- موتور Rust/WebAssembly (js/sky_fx.wasm). اگر بارگذاری نشد، همان شبیه‌سازی جاوااسکریپت کار می‌کند ----
+let wasm = null;
+const engineEl = () => document.getElementById('fx-engine');
+(async () => {
+  try {
+    const res = await fetch(new URL('./sky_fx.wasm', import.meta.url));
+    const { instance } = await WebAssembly.instantiate(await res.arrayBuffer(), {});
+    wasm = instance.exports;
+    if (W) { resize(); if (cfg) syncFx(); }
+    if (engineEl()) engineEl().textContent = 'موتور افکت‌ها: Rust / WebAssembly ✓';
+  } catch {
+    if (engineEl()) engineEl().textContent = 'موتور افکت‌ها: جاوااسکریپت (WebAssembly بارگذاری نشد)';
+  }
+})();
+const f32 = (ptr, n) => new Float32Array(wasm.memory.buffer, ptr, n);
+
 function resize() {
   dpr = Math.min(window.devicePixelRatio || 1, 1.5);
   W = innerWidth; H = innerHeight;
   cv.width = W * dpr; cv.height = H * dpr;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  stars = Array.from({ length: Math.round(W * H / 9000) }, () => ({
+  if (wasm) wasm.init(W, H, (Math.random() * 4294967295) >>> 0);
+  stars = wasm ? [] : Array.from({ length: Math.round(W * H / 9000) }, () => ({
     x: Math.random() * W, y: Math.random() * H * 0.78,
     r: Math.random() * 1.2 + 0.3, ph: Math.random() * 6.28, sp: Math.random() * 2 + 0.6,
   }));
@@ -215,6 +232,12 @@ function seedPrecip() {
   const area = W * H;
   const per = fx.mode === 'rain' ? (fx.storm ? 2800 : fx.heavy ? 3200 : 6500) : fx.mode === 'drizzle' ? 11000 : fx.mode === 'snow' ? (fx.heavy ? 5500 : 11000) : 0;
   const n = per ? Math.round(area / per) : 0;
+  if (wasm) {
+    const id = fx.mode === 'rain' ? 1 : fx.mode === 'drizzle' ? 2 : fx.mode === 'snow' ? 3 : 0;
+    wasm.set_mode(id, n, fx.storm ? 1 : 0);
+    drops = []; flakes = [];
+    return;
+  }
   if (fx.mode === 'rain' || fx.mode === 'drizzle') {
     const k = fx.mode === 'drizzle' ? 0.55 : 1;
     drops = Array.from({ length: n }, () => ({
@@ -258,6 +281,16 @@ reduced.addEventListener?.('change', () => cfg && syncFx());
 function drawStars(ts) {
   if (fx.stars <= 0.01) return;
   ctx.fillStyle = '#fff';
+  if (wasm) {
+    wasm.stars_step(reduced.matches ? 0 : ts / 1000);
+    const a = f32(wasm.stars_ptr(), wasm.stars_len() * 4);
+    for (let i = 0; i < a.length; i += 4) {
+      ctx.globalAlpha = fx.stars * a[i + 3] * 0.9;
+      ctx.beginPath(); ctx.arc(a[i], a[i + 1], a[i + 2], 0, 6.283); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    return;
+  }
   for (const s of stars) {
     const tw = reduced.matches ? 1 : 0.6 + 0.4 * Math.sin(ts / 1000 * s.sp + s.ph);
     ctx.globalAlpha = fx.stars * tw * 0.9;
@@ -273,6 +306,13 @@ function drawStatic() {
 }
 
 function makeBolt() {
+  if (wasm) {
+    const n = wasm.make_bolt((Math.random() * 4294967295) >>> 0);
+    const a = f32(wasm.bolt_ptr(), n * 2);
+    const pts = [];
+    for (let i = 0; i < a.length; i += 2) pts.push([a[i], a[i + 1]]);
+    return { pts, t0: performance.now() };
+  }
   const pts = [];
   let x = W * (0.15 + Math.random() * 0.7), y = 0;
   while (y < H * (0.45 + Math.random() * 0.3)) {
@@ -290,7 +330,20 @@ function frame(ts) {
   ctx.clearRect(0, 0, W, H);
   drawStars(ts);
 
-  if (fx.mode === 'rain' || fx.mode === 'drizzle') {
+  if (wasm && fx.mode !== 'none') {
+    wasm.step(dt);
+    const a = f32(wasm.particles_ptr(), wasm.particles_len() * 4);
+    if (fx.mode === 'snow') {
+      ctx.fillStyle = 'rgba(255,255,255,.85)';
+      for (let i = 0; i < a.length; i += 4) { ctx.beginPath(); ctx.arc(a[i], a[i + 1], a[i + 2], 0, 6.283); ctx.fill(); }
+    } else {
+      ctx.strokeStyle = fx.mode === 'drizzle' ? 'rgba(200,220,255,.28)' : 'rgba(200,222,255,.42)';
+      ctx.lineWidth = fx.mode === 'drizzle' ? 1 : 1.3;
+      ctx.beginPath();
+      for (let i = 0; i < a.length; i += 4) { ctx.moveTo(a[i], a[i + 1]); ctx.lineTo(a[i] + a[i + 2], a[i + 1] + a[i + 3]); }
+      ctx.stroke();
+    }
+  } else if (fx.mode === 'rain' || fx.mode === 'drizzle') {
     ctx.strokeStyle = fx.mode === 'drizzle' ? 'rgba(200,220,255,.28)' : 'rgba(200,222,255,.42)';
     ctx.lineWidth = fx.mode === 'drizzle' ? 1 : 1.3;
     ctx.beginPath();

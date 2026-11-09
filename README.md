@@ -28,7 +28,10 @@ manifest.json
 index.html
 css/style.css
 js/main.js        راه‌اندازی، ساعت، پنل آب‌وهوا، تنظیمات
-js/sky.js         آسمان: رنگ، خورشید/ماه، ابر، ستاره، باران/برف/رعد
+js/sky.js         آسمان: رنگ، خورشید/ماه، ابر، و رسم افکت‌ها روی Canvas
+js/sky_fx.wasm    موتور ذرات (باران/برف/ستاره/رعد) — ساخته‌شده با Rust
+wasm/             سورس Rust موتور افکت‌ها (Cargo)
+build-wasm.sh     ساخت دوبارهٔ js/sky_fx.wasm
 js/weather.js     Open-Meteo، متن فارسی، آیکون‌ها
 js/notes.js       دفترچه یادداشت
 js/bookmarks.js   نشانک‌های دسته‌بندی‌شده

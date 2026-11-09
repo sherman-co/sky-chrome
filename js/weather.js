@@ -39,7 +39,7 @@ export const kindOf = (code) => (CODES[code] || ['cloudy', 'نامشخص'])[0];
 export const textOf = (code) => (CODES[code] || ['cloudy', 'نامشخص'])[1];
 
 // برای پیش‌نمایش
-const SIM = {
+export const SIM = {
   clear: { code: 0, cloud: 5 },
   partly: { code: 2, cloud: 45 },
   cloudy: { code: 3, cloud: 95 },

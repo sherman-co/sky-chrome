@@ -1,4 +1,5 @@
 .DS_Store
+wasm/target/
 node_modules/
 *.rar
 *.zip
