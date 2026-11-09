@@ -457,3 +457,125 @@ output { color: var(--ink-soft); font-size: .8rem; margin-inline-start: .3rem; }
 @media (prefers-contrast: more) {
   .glass { background: rgba(10, 16, 36, .75); border-color: rgba(255, 255, 255, .6); }
 }
+
+/* =====================================================================
+   طراحی نسخهٔ ۳ — عمق، شیشهٔ درخشان، تب‌ها، کاشی‌های بزرگ
+   ===================================================================== */
+
+/* کوه‌های لایه‌ای */
+.land { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 40vh; min-height: 240px; }
+.land .l1 { fill: var(--land-1); }
+.land .l2 { fill: var(--land-2); }
+.land .l3 { fill: var(--land-3); }
+.land path { transition: fill 2s; }
+.land .l1 { animation: ridge 90s ease-in-out infinite alternate; }
+@keyframes ridge { from { transform: translateX(-12px); } to { transform: translateX(12px); } }
+
+/* پرتوهای خورشید */
+.orb.sun::after {
+  content: ''; position: absolute; inset: -70%; border-radius: 50%; pointer-events: none;
+  background: repeating-conic-gradient(from 0deg, rgba(255, 244, 200, .20) 0 3deg, transparent 3deg 12deg);
+  -webkit-mask: radial-gradient(circle, #000 4%, transparent 58%); mask: radial-gradient(circle, #000 4%, transparent 58%);
+  animation: rays 160s linear infinite;
+}
+@keyframes rays { to { transform: rotate(360deg); } }
+
+/* شیشهٔ درخشان */
+.glass {
+  position: relative; border: 0; border-radius: 24px;
+  background:
+    radial-gradient(120% 90% at 8% -12%, rgba(255, 255, 255, .36), transparent 56%),
+    linear-gradient(160deg, rgba(255, 255, 255, .18), rgba(255, 255, 255, .03) 62%),
+    rgba(14, 24, 56, var(--tint, .28));
+  -webkit-backdrop-filter: blur(28px) saturate(1.9) brightness(1.06);
+  backdrop-filter: blur(28px) saturate(1.9) brightness(1.06);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, .6), inset 0 -14px 28px rgba(255, 255, 255, .035),
+              0 22px 50px -14px rgba(0, 0, 24, .5), 0 2px 8px rgba(0, 0, 24, .16);
+}
+.glass::before {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; padding: 1px; pointer-events: none;
+  background: linear-gradient(140deg, rgba(255, 255, 255, .75), rgba(255, 255, 255, .08) 38%, rgba(255, 255, 255, .06) 62%, rgba(255, 255, 255, .38));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+}
+body.hc .glass::before { background: rgba(255, 255, 255, .7); }
+dialog.dialog::before { display: block; }
+
+/* چیدمان */
+.layout { max-width: 1240px; gap: 2rem; justify-content: center; }
+.main-col { max-width: 860px; }
+
+/* چیپ آب‌وهوا */
+.weather-chip { padding: .5rem 1.15rem .5rem .95rem; gap: .8rem; }
+.chip-icon { width: 46px; height: 46px; }
+.chip-temp { font-size: 1.9rem; font-weight: 500; }
+.chip-desc { font-size: .95rem; }
+.chip-city { font-size: .75rem; }
+.icon-btn { width: 48px; height: 48px; }
+
+/* ساعت */
+.hero { margin: 2.2rem 0 2rem; }
+.greeting { font-size: 1rem; letter-spacing: .06em; opacity: .95; }
+#time {
+  font-size: clamp(5.5rem, 14vw, 10.5rem); font-weight: 100; letter-spacing: -.03em; line-height: 1;
+  text-shadow: none; filter: drop-shadow(0 6px 30px rgba(0, 0, 30, .38));
+}
+#date { font-size: 1.15rem; margin-top: .35rem; }
+
+/* جستجو */
+.search { padding: 1.05rem 1.6rem; max-width: 600px; margin-bottom: 2.8rem; font-size: 1.1rem; }
+.search:focus-within { max-width: 720px; box-shadow: inset 0 1px 1px rgba(255, 255, 255, .6), 0 0 0 2px rgba(255, 255, 255, .9), 0 24px 60px -10px rgba(0, 0, 24, .5); }
+.search input { font-size: 1.1rem; }
+
+/* نشانک‌ها: تب‌ها + کاشی‌های بزرگ */
+.tabs { display: flex; flex-wrap: wrap; gap: .45rem; margin-bottom: 1rem; }
+.tab {
+  display: inline-flex; align-items: center; gap: .5rem; padding: .35rem .95rem; border-radius: 999px; font-size: .88rem; font-weight: 500;
+  background: rgba(255, 255, 255, .13); border: 1px solid rgba(255, 255, 255, .28);
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  transition: transform .25s var(--spring), background-color .25s, color .25s;
+}
+.tab:hover { transform: translateY(-2px); background: rgba(255, 255, 255, .24); }
+.tab[aria-pressed='true'] { background: #fff; color: var(--navy); border-color: #fff; font-weight: 700; box-shadow: 0 6px 20px -4px rgba(0, 0, 30, .4); }
+.tab .count { background: rgba(255, 255, 255, .22); font-size: .68rem; padding: 0 .45rem; }
+.tab[aria-pressed='true'] .count { background: rgba(20, 48, 107, .12); }
+.tab.danger { background: rgba(229, 72, 77, .25); border-color: rgba(229, 72, 77, .6); }
+.tab.danger:hover { background: #e5484d; }
+
+.grid { grid-template-columns: repeat(auto-fill, minmax(116px, 1fr)); gap: .9rem; padding: .4rem .2rem 1.2rem; animation: gridIn .45s var(--ease); }
+@keyframes gridIn { from { opacity: 0; transform: translateY(8px); } }
+.bm { border-radius: 24px; }
+.bm-link { padding: 1.25rem .6rem 1rem; gap: .7rem; }
+.fav { width: 60px; height: 60px; border-radius: 19px; font-size: 1.4rem; background: linear-gradient(145deg, rgba(255, 255, 255, .42), rgba(255, 255, 255, .14)); box-shadow: inset 0 1px 1px rgba(255, 255, 255, .7), 0 6px 14px -4px rgba(0, 0, 24, .35); }
+.fav img { width: 36px; height: 36px; border-radius: 9px; }
+.bm-name { font-size: .85rem; font-weight: 500; }
+.bm:hover { transform: translateY(-6px) scale(1.04); box-shadow: inset 0 1px 1px rgba(255, 255, 255, .7), 0 30px 50px -14px rgba(0, 0, 24, .55); }
+.bm-add button {
+  width: 100%; height: 100%; min-height: 128px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .2rem;
+  background: transparent; border: 1.5px dashed rgba(255, 255, 255, .45); border-radius: 24px; font-size: .85rem; color: var(--ink-soft);
+  transition: background-color .25s, transform .3s var(--spring), color .25s;
+}
+.bm-add button span { font-size: 1.8rem; line-height: 1; font-weight: 300; }
+.bm-add button:hover { background: rgba(255, 255, 255, .14); color: #fff; transform: translateY(-4px); }
+.bm-add { list-style: none; }
+.section-head { margin-bottom: .8rem; }
+.section-head h2 { font-size: 1.15rem; }
+
+/* یادداشت‌ها: جمع‌وجور */
+.notes { width: 330px; height: auto; min-height: 0; max-height: min(74vh, 620px); border-radius: 26px; }
+.notes-log { flex: 1 1 auto; min-height: 170px; }
+.notes-log .empty { padding: 1rem .5rem; }
+.notes-head { padding: 1.1rem 1.2rem .8rem; }
+.notes-head h2 { font-size: 1.15rem; }
+.bubble { border-radius: 20px 20px 6px 20px; }
+
+@media (max-width: 960px) {
+  .notes { width: 100%; max-height: none; }
+  .land { height: 28vh; }
+}
+
+/* تنظیم نهایی: نشانک‌ها وسط‌چین، ساعت خواناتر */
+.section-head { justify-content: center; gap: .9rem; }
+.tabs { justify-content: center; }
+.grid { grid-template-columns: repeat(auto-fit, minmax(116px, 136px)); justify-content: center; }
+#time { font-weight: 200; filter: drop-shadow(0 6px 30px rgba(0, 0, 30, .5)); }

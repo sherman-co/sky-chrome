@@ -18,10 +18,10 @@ const KEYS = [
   [-1.0, '#04081a', '#080f2b', '#111c46'],
   [-0.30, '#0a1433', '#16255a', '#2f3a76'],
   [-0.08, '#1b2a63', '#5b4a8a', '#d9714f'],
-  [0.05, '#2a4b8f', '#b2708a', '#f3a066'],
-  [0.25, '#2a68b2', '#6a9ccf', '#e8b985'],
-  [0.60, '#2263b2', '#4c97da', '#86bde6'],
-  [1.0, '#1b5eae', '#4291d8', '#7fb8e4'],
+  [0.05, '#2f5fb8', '#c47c8c', '#ffad6a'],
+  [0.25, '#2e74d4', '#6db0ea', '#f4cf9a'],
+  [0.60, '#2872d8', '#58aef2', '#a5d8f8'],
+  [1.0, '#2170d6', '#4fa8f0', '#9fd4f8'],
 ].map(([e, a, b, c]) => ({ e, c: [hex(a), hex(b), hex(c)] }));
 
 function paletteAt(e) {
@@ -111,6 +111,11 @@ function render(timeOnly = false) {
   root.style.setProperty('--sky-top', css(top));
   root.style.setProperty('--sky-mid', css(mid));
   root.style.setProperty('--sky-bot', css(bot));
+
+  // رنگ کوه‌ها: دورتر روشن‌تر (پرسپکتیو هوایی)، نزدیک‌تر تیره‌تر
+  root.style.setProperty('--land-1', css(lerpC(bot, [24, 34, 70], 0.38)));
+  root.style.setProperty('--land-2', css(lerpC(bot, [12, 20, 46], 0.62)));
+  root.style.setProperty('--land-3', css(lerpC(bot, [5, 9, 22], 0.86)));
 
   // رنگ ابر
   const base = lerpC(mid, [255, 255, 255], clamp(0.3 + e * 0.5, 0.12, 0.6));
